@@ -7,7 +7,7 @@ format: pdf
 This lab is due Friday, July 28 at 11:59pm.
 :::
 
-# Learning Goals
+# Learning Goals yg
 
 -   Learn the basic usage of Git/Github and use it to download and upload assignments. 
 
