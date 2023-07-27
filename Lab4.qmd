@@ -186,10 +186,25 @@ library(tidymodels)
 ## Exercise 1
 
 - Part A: load the data and save the data frame as `parasites`.
+```{r}
+parasites <- read.csv("parasites.csv")
+```
+
 
 - Part B: Let's start by examining the relationship between `divergence_time` and `parsim`. Based on the goals of the analysis, what is the response variable?
 
+Based on our goal of identifying how much parasite charcteriscs are dependant on evolution, parsim is the responce variable and divergence_time is the explanatory variable.
+
 - Part C: Visualize the relationship between the two variables. (no regression line needed) Give no more than 1-2 sentences describing any patterns you see. 
+```{r}
+parasites |> 
+  ggplot() +
+geom_point(aes( x = divergence_time, y = parsim))+
+  labs( x="Time since divergence in MYA",
+        y= "Parasite similarity",
+        title= "Relationship Between Time of Divergence and Similarity")
+```
+This visualization suggests a negative corelation between similarity and time since divergence. This might suggest that parasite species that diverged longer ago are less likely to be physilogically similar,
 
 
 ## Exercise 2
@@ -197,10 +212,35 @@ library(tidymodels)
 Now, we'll model this relationship.
 
 - Part A:  Fit a simple linear regression model on `divergence_time` and `parsim` based on your answer in Question 1B. Report the coefficients.   
+```{r}
+fit.m = linear_reg() |>
+  set_engine("lm") |>
+  fit(parsim ~ divergence_time, data = parasites) 
+fit.m
+
+```
+The coefficents for a linear regression with x = divergence time and y= parasim are an intercept coefficent of 0.379486678  and 
+a slope coefficent of -0.006531791.
 
 - Part B: Interpret the slope and the intercept in the context of the data.
 
+The intercept in this context is the predicted similarity between two parisites given a divergence time of zero.
+The diverence_time/slope coefficent means that for every 1 million year incease in divergence time, the predicted similarity score 
+for a parasite decreases by 0.00653.
+
 - Part C:  Recreate the visualization from Exercise 1, this time adding a regression line to the visualization. What do you notice about the prediction (regression) line that may be strange, particularly for very large divergence times? (no more than 1-2 sentences)
+
+```{r}
+parasites |> 
+  ggplot(aes( x = divergence_time, y = parsim)) +
+geom_point()+
+  geom_smooth(method = "lm") +
+  labs( x="Time since divergence in MYA",
+        y= "Parasite similarity",
+        title= "Relationship Between Time of Divergence and Similarity") 
+```
+One strange thing about the divergence line is that the residuals grow strongly positive at high divergence,
+meaning that the species are far more similar than expected. 
 
 
 ## Exercise 3.  
@@ -209,9 +249,34 @@ Since `parsim` takes values between 0 and 1, we want to transform this variable 
 
 - Part A:  Using mutate, create a new variable `transformed_parsim` that is calculated as `log(parsim/(1-parsim))`. Add this variable to your data frame. Note: `log()` in R represents taking the **natural log**.
 
+```{r}
+parasites.mod<-parasites |> 
+  mutate(transformed_parsim = log(parsim/(1-parsim)) )
+
+```
+
+
 - Part B: Visualize the relationship between `divergence_time` and `transformed_parsim`. Add a regression line to your visualization.
+```{r}
+parasites.mod|> 
+  ggplot(aes( x = divergence_time, y = transformed_parsim)) +
+geom_point()+
+  geom_smooth(method = "lm") +
+  labs( x="Time since divergence in MYA",
+        y= "Adjusted Parasite similarity",
+        title= "Relationship Between Time of Divergence and Similarity") 
+```
+
 
 - Part C: Fit a simple linear regression model on `divergence_time` and `transformed_parsim`.  Report the coefficients. 
+```{r}
+transform.fit = linear_reg() |>
+  set_engine("lm") |>
+  fit(transformed_parsim ~ divergence_time, data = parasites.mod) 
+transform.fit
+```
+The coefficent for the intercept is  0.36836, and the coefficent for the slope is -0.09066.
+
 
 
 # Submission
